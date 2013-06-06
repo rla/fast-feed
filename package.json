@@ -1,0 +1,16 @@
+{
+    "name": "fast-feed",
+    "version": "0.0.1",
+    "keywords": [
+        "rss",
+        "atom",
+        "feed",
+        "syndication",
+        "xml",
+        "rapidxml"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/rla/fast-feed.git"
+    }
+}
