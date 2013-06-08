@@ -103,6 +103,38 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed) {
             item->Set(String::NewSymbol("id"), String::New(id));
         }
 
+        // Extracts the link property.
+
+        xml_node<char> *linkNode = itemNode->first_node("link");
+
+        bool found = false;
+        while (linkNode) {
+            xml_attribute<char> *relAttr = linkNode->first_attribute("rel");
+            xml_attribute<char> *hrefAttr = linkNode->first_attribute("href");
+            if (relAttr && hrefAttr) {
+                char *rel = relAttr->value();
+                if (strcmp(rel, "self")) {
+                    item->Set(String::NewSymbol("link"), String::New(hrefAttr->value()));
+                    found = true;
+                    break;
+                }
+            }
+            linkNode = linkNode->next_sibling("link");
+        }
+
+        // Did not find rel="self" link.
+        // Try take the first link.
+
+        if (!found) {
+            xml_node<char> *linkNode = itemNode->first_node("link");
+            if (linkNode) {
+                xml_attribute<char> *hrefAttr = linkNode->first_attribute("href");
+                if (hrefAttr) {
+                    item->Set(String::NewSymbol("link"), String::New(hrefAttr->value()));
+                }
+            }
+        }
+
         // Extract the item title.
 
         char *title = readTextNode(itemNode, "title");
@@ -193,6 +225,13 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed) {
         char *guid = readTextNode(itemNode, "guid");
         if (guid) {
             item->Set(String::NewSymbol("id"), String::New(guid));
+        }
+
+        // Extracts the link property.
+
+        char *link = readTextNode(itemNode, "link");
+        if (link) {
+            item->Set(String::NewSymbol("link"), String::New(link));
         }
 
         // Extract the item title.
