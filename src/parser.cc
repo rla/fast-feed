@@ -142,6 +142,21 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed) {
             item->Set(String::NewSymbol("title"), String::New(title));
         }
 
+        // Extract the published property.
+
+        char *date = readTextNode(itemNode, "published");
+        if (date) {
+            item->Set(String::NewSymbol("date"), String::New(date));
+        }
+
+        // Extract the updated property.
+        // Overwrites date set from published.
+
+        date = readTextNode(itemNode, "updated");
+        if (date) {
+            item->Set(String::NewSymbol("date"), String::New(date));
+        }
+
         // Extract the item author.
 
         char *author = readTextNode(itemNode, "author");
@@ -232,6 +247,20 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed) {
         char *link = readTextNode(itemNode, "link");
         if (link) {
             item->Set(String::NewSymbol("link"), String::New(link));
+        }
+
+        // Extracts the pubDate property.
+
+        char *date = readTextNode(itemNode, "pubDate");
+        if (date) {
+            item->Set(String::NewSymbol("date"), String::New(date));
+        }
+
+        // Sometimes given in Dublin Core extension.
+
+        date = readTextNode(itemNode, "dc:date");
+        if (date) {
+            item->Set(String::NewSymbol("date"), String::New(date));
         }
 
         // Extract the item title.
