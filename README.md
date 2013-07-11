@@ -1,11 +1,9 @@
-fast-feed
-=========
+# fast-feed
 
 Node.JS module for parsing newsfeeds (RSS 2 and Atom). It should be one
 of the fastest feed parsers. Uses [RapidXML](http://rapidxml.sourceforge.net/).
 
-Usage
------
+## Usage
 
 Without callback (throws exception):
 
@@ -33,8 +31,7 @@ Or:
         console.log(feed);
     });
 
-License
--------
+## License
 
 The binding code is covered with the MIT license. RapidXML is dual-licensed
 (MIT and Boost Software License, see LICENSE.rapidxml).
