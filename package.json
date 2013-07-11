@@ -1,6 +1,6 @@
 {
     "name": "fast-feed",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "keywords": [
         "rss",
         "atom",
@@ -12,5 +12,11 @@
     "repository": {
         "type": "git",
         "url": "https://github.com/rla/fast-feed.git"
+    },
+    "devDependencies": {
+        "mocha": "1.x"
+    },
+    "scripts": {
+        "test": "mocha tests"
     }
 }

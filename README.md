@@ -20,6 +20,19 @@ With callback:
         console.log(feed);
     });
 
+Do not parse content/description:
+
+    var fastFeed = require('fast-feed');
+    fastFeed.parse(xml_string, { content: false });
+
+Or:
+
+    var fastFeed = require('fast-feed');
+    fastFeed.parse(xml_string, { content: false }, function(err, feed) {
+        if (err) throw err;
+        console.log(feed);
+    });
+
 License
 -------
 

@@ -53,7 +53,7 @@ std::pair<int, int> findErrorLine(const char* xml, const char* where) {
 
 // Parses the Atom feed.
 
-void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed) {
+void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool extractContent) {
 
     feed->Set(String::NewSymbol("type"), String::New("atom"));
 
@@ -107,13 +107,16 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed) {
 
         xml_node<char> *linkNode = itemNode->first_node("link");
 
+        // Tries to find either <link rel="self"> or <link rel="alternate"> element.
+        // https://github.com/rla/fast-feed/issues/2
+
         bool found = false;
         while (linkNode) {
             xml_attribute<char> *relAttr = linkNode->first_attribute("rel");
             xml_attribute<char> *hrefAttr = linkNode->first_attribute("href");
             if (relAttr && hrefAttr) {
                 char *rel = relAttr->value();
-                if (strcmp(rel, "self")) {
+                if (strcmp(rel, "self") == 0 || strcmp(rel, "alternate") == 0) {
                     item->Set(String::NewSymbol("link"), String::New(hrefAttr->value()));
                     found = true;
                     break;
@@ -164,18 +167,21 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed) {
             item->Set(String::NewSymbol("author"), String::New(author));
         }
 
-        // Extract the item summary.
+        if (extractContent) {
 
-        char *summary = readTextNode(itemNode, "author");
-        if (summary) {
-            item->Set(String::NewSymbol("summary"), String::New(summary));
-        }
+            // Extract the item summary.
 
-        // Extract the item content.
+            char *summary = readTextNode(itemNode, "summary");
+            if (summary) {
+                item->Set(String::NewSymbol("summary"), String::New(summary));
+            }
 
-        char *content = readTextNode(itemNode, "content");
-        if (content) {
-            item->Set(String::NewSymbol("content"), String::New(content));
+            // Extract the item content.
+
+            char *content = readTextNode(itemNode, "content");
+            if (content) {
+                item->Set(String::NewSymbol("content"), String::New(content));
+            }
         }
 
         items->Set(Number::New(i), item);
@@ -188,7 +194,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed) {
 
 // Parses the RSS feed.
 
-void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed) {
+void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extractContent) {
 
     feed->Set(String::NewSymbol("type"), String::New("rss"));
 
@@ -277,11 +283,14 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed) {
             item->Set(String::NewSymbol("author"), String::New(author));
         }
 
-        // Extract the item description.
+        if (extractContent) {
 
-        char *description = readTextNode(itemNode, "description");
-        if (description) {
-            item->Set(String::NewSymbol("description"), String::New(description));
+            // Extract the item description.
+
+            char *description = readTextNode(itemNode, "description");
+            if (description) {
+                item->Set(String::NewSymbol("description"), String::New(description));
+            }
         }
 
         items->Set(Number::New(i), item);
@@ -314,6 +323,11 @@ Handle<Value> Method(const Arguments& args) {
         return scope.Close(Undefined());
     }
 
+    bool extractContent = true;
+    if (args.Length() == 2) {
+        extractContent = args[1]->BooleanValue();
+    }
+
     // Creates new object to store the feed
     // contents.
 
@@ -323,11 +337,11 @@ Handle<Value> Method(const Arguments& args) {
 
     xml_node<> *rssNode = doc.first_node("rss");
     if (rssNode) {
-        parseRssFeed(rssNode, feed);
+        parseRssFeed(rssNode, feed, extractContent);
     } else {
         xml_node<> *feedNode = doc.first_node("feed");
         if (feedNode) {
-            parseAtomFeed(feedNode, feed);
+            parseAtomFeed(feedNode, feed, extractContent);
         } else {
             ThrowException(Exception::TypeError(String::New("Invalid feed.")));
             return scope.Close(Undefined());
