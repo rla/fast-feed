@@ -1,7 +1,7 @@
 #include <node.h>
 #include <v8.h>
 #include <sstream>
-
+#include <string.h>
 #include "rapidxml.hpp"
 
 // Used example code from:
