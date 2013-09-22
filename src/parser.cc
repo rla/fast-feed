@@ -296,7 +296,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
         }
 
         items->Set(Number::New(i), item);
-        itemNode = itemNode->next_sibling();
+        itemNode = itemNode->next_sibling("item");
         i++;
     }
 
