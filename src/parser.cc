@@ -136,6 +136,12 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
                 xml_attribute<char> *hrefAttr = linkNode->first_attribute("href");
                 if (hrefAttr) {
                     item->Set(String::NewSymbol("link"), String::New(hrefAttr->value()));
+                } else {
+                    // Try take text node inside it.
+                    xml_node<char> *textNode = linkNode->first_node();
+                    if (textNode) {
+                        item->Set(String::NewSymbol("link"), String::New(textNode->value()));
+                    }
                 }
             }
         }
