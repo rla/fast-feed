@@ -105,46 +105,58 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
             item->Set(String::NewSymbol("id"), String::New(id));
         }
 
-        // Extracts the link property.
+        Local<Array> links = Array::New();
+
+        // Extracts all links.
+        // 4.2.7. The "atom:link" Element
 
         xml_node<char> *linkNode = itemNode->first_node("link");
 
-        // Tries to find either <link rel="self"> or <link rel="alternate"> element.
-        // https://github.com/rla/fast-feed/issues/2
+        int linkIndex = 0;
 
-        bool found = false;
         while (linkNode) {
+
+            Local<Object> link = Object::New();
+
             xml_attribute<char> *relAttr = linkNode->first_attribute("rel");
             xml_attribute<char> *hrefAttr = linkNode->first_attribute("href");
-            if (relAttr && hrefAttr) {
-                char const *rel = relAttr->value();
-                if (strcmp(rel, "self") == 0 || strcmp(rel, "alternate") == 0) {
-                    item->Set(String::NewSymbol("link"), String::New(hrefAttr->value()));
-                    found = true;
-                    break;
-                }
+            xml_attribute<char> *typeAttr = linkNode->first_attribute("type");
+            xml_attribute<char> *hreflangAttr = linkNode->first_attribute("hreflang");
+            xml_attribute<char> *titleAttr = linkNode->first_attribute("title");
+            xml_attribute<char> *lengthAttr = linkNode->first_attribute("length");
+
+            if (relAttr) {
+                link->Set(String::NewSymbol("rel"), String::New(relAttr->value()));
             }
+
+            if (hrefAttr) {
+                link->Set(String::NewSymbol("href"), String::New(hrefAttr->value()));
+            }
+
+            if (typeAttr) {
+                link->Set(String::NewSymbol("type"), String::New(typeAttr->value()));
+            }
+
+            if (hreflangAttr) {
+                link->Set(String::NewSymbol("hreflang"), String::New(hreflangAttr->value()));
+            }
+
+            if (titleAttr) {
+                link->Set(String::NewSymbol("title"), String::New(titleAttr->value()));
+            }
+
+            if (lengthAttr) {
+                link->Set(String::NewSymbol("length"), String::New(lengthAttr->value()));
+            }
+
+            links->Set(Number::New(linkIndex), link);
+
+            linkIndex++;
+
             linkNode = linkNode->next_sibling("link");
         }
 
-        // Did not find rel="self" link.
-        // Try take the first link.
-
-        if (!found) {
-            xml_node<char> *linkNode = itemNode->first_node("link");
-            if (linkNode) {
-                xml_attribute<char> *hrefAttr = linkNode->first_attribute("href");
-                if (hrefAttr) {
-                    item->Set(String::NewSymbol("link"), String::New(hrefAttr->value()));
-                } else {
-                    // Try take text node inside it.
-                    xml_node<char> *textNode = linkNode->first_node();
-                    if (textNode) {
-                        item->Set(String::NewSymbol("link"), String::New(textNode->value()));
-                    }
-                }
-            }
-        }
+        item->Set(String::NewSymbol("links"), links);
 
         // Extract the item title.
 
