@@ -26,7 +26,13 @@ function atomLink(article) {
             }
         }
     }
-    article.link = link ? link.href : undefined;
+    if (link) {
+        if (link.href) {
+            article.link = link.href;
+        } else {
+            article.link = link.text;
+        }
+    }
 }
 
 // Postprocess a single Atom feed article.

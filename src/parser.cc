@@ -149,6 +149,12 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
                 link->Set(String::NewSymbol("length"), String::New(lengthAttr->value()));
             }
 
+            xml_node<char> *textNode = linkNode->first_node();
+
+            if (textNode) {
+                link->Set(String::NewSymbol("text"), String::New(textNode->value()));
+            }
+
             links->Set(Number::New(linkIndex), link);
 
             linkIndex++;

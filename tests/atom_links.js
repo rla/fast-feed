@@ -9,6 +9,12 @@ var atom1 = '<feed><title>Test</title><entry>' +
     '<link rel="alternate" type="text/html" href="http://example.com/5" />' +
     '</entry></feed>';
 
+// Not valid but still used.
+
+var atom2 = '<feed><title>Test</title><entry>' +
+    '<link>http://example.com/1</link>' +
+    '</entry></feed>';
+
 describe('Parser (Atom)', function() {
 
     it('should parse all entry links', function() {
@@ -16,6 +22,13 @@ describe('Parser (Atom)', function() {
         assert.equal(feed.items.length, 1);
         assert.equal(feed.items[0].links.length, 5);
         assert.equal(feed.items[0].link, 'http://example.com/5');
+    });
+
+    it('should parse one with text content', function() {
+        var feed = parser.parse(atom2);
+        assert.equal(feed.items.length, 1);
+        assert.equal(feed.items[0].links.length, 1);
+        assert.equal(feed.items[0].link, 'http://example.com/1');
     });
 
 });
