@@ -1,6 +1,6 @@
 {
     "name": "fast-feed",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "keywords": [
         "rss",
         "atom",
@@ -18,5 +18,16 @@
     },
     "scripts": {
         "test": "mocha tests"
-    }
+    },
+    "files": [
+        "src",
+        "tests",
+        "binding.gyp",
+        "index.js",
+        "LICENSE",
+        "LICENSE.rapidxml",
+        "Makefile",
+        "package.json",
+        "README.md"
+    ]
 }
