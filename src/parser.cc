@@ -151,6 +151,10 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
             xml_node<char> *textNode = linkNode->first_node();
 
+            // This is not by spec but some feeds
+            // put URL/IRI into link's text node like:
+            // <link>http://example.com</link>
+
             if (textNode) {
                 link->Set(String::NewSymbol("text"), String::New(textNode->value()));
             }
