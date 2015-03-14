@@ -7,29 +7,37 @@ of the fastest feed parsers. Uses [RapidXML](http://rapidxml.sourceforge.net/).
 
 Without callback (throws exception):
 
-    var fastFeed = require('fast-feed');
-    fastFeed.parse(xml_string);
+```javascript
+var fastFeed = require('fast-feed');
+fastFeed.parse(xml_string);
+```
 
 With callback:
 
-    var fastFeed = require('fast-feed');
-    fastFeed.parse(xml_string, function(err, feed) {
-        if (err) throw err;
-        console.log(feed);
-    });
+```javascript
+var fastFeed = require('fast-feed');
+fastFeed.parse(xml_string, function(err, feed) {
+    if (err) throw err;
+    console.log(feed);
+});
+```
 
 Do not parse content/description:
 
-    var fastFeed = require('fast-feed');
-    fastFeed.parse(xml_string, { content: false });
+```javascript
+var fastFeed = require('fast-feed');
+fastFeed.parse(xml_string, { content: false });
+```
 
 Or:
 
-    var fastFeed = require('fast-feed');
-    fastFeed.parse(xml_string, { content: false }, function(err, feed) {
-        if (err) throw err;
-        console.log(feed);
-    });
+```
+var fastFeed = require('fast-feed');
+fastFeed.parse(xml_string, { content: false }, function(err, feed) {
+    if (err) throw err;
+    console.log(feed);
+});
+```
 
 ## Extracted feed attributes
 
