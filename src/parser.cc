@@ -209,7 +209,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
                 link->Set(NanNew<String>("text"), NanNew<String>(textNode->value()));
             }
 
-            links->Set(Number::New(linkIndex), link);
+            links->Set(NanNew<Number>(linkIndex), link);
 
             linkIndex++;
 
