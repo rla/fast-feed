@@ -1,33 +1,36 @@
 {
-    "name": "fast-feed",
-    "version": "0.0.12",
-    "keywords": [
-        "rss",
-        "atom",
-        "feed",
-        "syndication",
-        "xml",
-        "rapidxml"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/rla/fast-feed.git"
-    },
-    "devDependencies": {
-        "mocha": "1.x"
-    },
-    "scripts": {
-        "test": "mocha tests"
-    },
-    "files": [
-        "src",
-        "tests",
-        "binding.gyp",
-        "index.js",
-        "LICENSE",
-        "LICENSE.rapidxml",
-        "Makefile",
-        "package.json",
-        "README.md"
-    ]
+  "name": "fast-feed",
+  "version": "0.0.12",
+  "keywords": [
+    "rss",
+    "atom",
+    "feed",
+    "syndication",
+    "xml",
+    "rapidxml"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rla/fast-feed.git"
+  },
+  "devDependencies": {
+    "mocha": "1.x"
+  },
+  "scripts": {
+    "test": "mocha tests"
+  },
+  "files": [
+    "src",
+    "tests",
+    "binding.gyp",
+    "index.js",
+    "LICENSE",
+    "LICENSE.rapidxml",
+    "Makefile",
+    "package.json",
+    "README.md"
+  ],
+  "dependencies": {
+    "nan": "~1.7.0"
+  }
 }
