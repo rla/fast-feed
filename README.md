@@ -72,7 +72,7 @@ For Atom feeds:
 ```
 
 Any attribute besides `type` might be missing. `summary` and `content` are missing when
-the `{ content: false }` option is used.
+the `content: false` option is used.
 
 For RSS 2 feeds:
 
@@ -95,7 +95,7 @@ For RSS 2 feeds:
 ```
 
 Any attribute besides `type` might be missing. `description` is missing from items when
-the `{ content: false }` option is used.
+the `content: false` option is used.
 
 ## Supported Node/io.js versions
 
