@@ -31,7 +31,7 @@ fastFeed.parse(xml_string, { content: false });
 
 Or:
 
-```
+```javascript
 var fastFeed = require('fast-feed');
 fastFeed.parse(xml_string, { content: false }, function(err, feed) {
     if (err) throw err;
