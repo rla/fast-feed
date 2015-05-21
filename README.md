@@ -105,6 +105,20 @@ This package uses [Nan](https://github.com/rvagg/nan) and has been tested (insta
  * node 0.10.24
  * node 0.12.0
 
+## Running tests
+
+Install dependencies:
+
+    npm install
+
+Build the addon:
+
+    node-gyp configure build
+
+Run tests (requires mocha globally installed):
+
+    make test
+
 ## License
 
 The binding code is covered with the MIT license. RapidXML is dual-licensed
