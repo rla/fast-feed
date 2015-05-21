@@ -119,6 +119,62 @@ Run tests (requires mocha globally installed):
 
     make test
 
+## Testing leaks
+
+Leak testing uses assumption that RSS (not the feed but memory) set grows slowly. If it grows
+fast then the extension (or something else) leaks.
+
+### Good
+
+RSS grows slowly:
+
+```
+$ make test-leak
+node --gc_global tests-leak/cdata.js
+{ rss: 12419072, heapTotal: 6163968, heapUsed: 2259008 }
+{ rss: 12955648, heapTotal: 6163968, heapUsed: 2392424 }
+{ rss: 12955648, heapTotal: 6163968, heapUsed: 2257952 }
+{ rss: 12955648, heapTotal: 6163968, heapUsed: 2118152 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 1976096 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3899040 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3755944 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3614592 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3473584 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3331376 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3188704 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 3048720 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 2905936 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 2764424 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 2623784 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 2481888 }
+{ rss: 14901248, heapTotal: 8261120, heapUsed: 2340056 }
+```
+
+### Bad
+
+RSS grows rapidly:
+
+```
+$ make test-leak
+node --gc_global tests-leak/cdata.js
+{ rss: 79446016, heapTotal: 6163968, heapUsed: 2259008 }
+{ rss: 146755584, heapTotal: 6163968, heapUsed: 2392424 }
+{ rss: 213798912, heapTotal: 6163968, heapUsed: 2257952 }
+{ rss: 281112576, heapTotal: 6163968, heapUsed: 2118152 }
+{ rss: 349970432, heapTotal: 8261120, heapUsed: 1976096 }
+{ rss: 417284096, heapTotal: 8261120, heapUsed: 3899040 }
+{ rss: 484597760, heapTotal: 8261120, heapUsed: 3755944 }
+{ rss: 551641088, heapTotal: 8261120, heapUsed: 3614592 }
+{ rss: 618954752, heapTotal: 8261120, heapUsed: 3473584 }
+{ rss: 685998080, heapTotal: 8261120, heapUsed: 3331376 }
+{ rss: 753311744, heapTotal: 8261120, heapUsed: 3188704 }
+{ rss: 820625408, heapTotal: 8261120, heapUsed: 3048720 }
+{ rss: 887668736, heapTotal: 8261120, heapUsed: 2905936 }
+{ rss: 954982400, heapTotal: 8261120, heapUsed: 2764424 }
+{ rss: 1022025728, heapTotal: 8261120, heapUsed: 2623784 }
+{ rss: 1089339392, heapTotal: 8261120, heapUsed: 2481888 }
+```
+
 ## License
 
 The binding code is covered with the MIT license. RapidXML is dual-licensed
