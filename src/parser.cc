@@ -2,6 +2,7 @@
 #include <nan.h>
 #include <v8.h>
 #include <sstream>
+#include <vector>
 #include <string.h>
 #include "rapidxml.hpp"
 
@@ -17,7 +18,7 @@ char const *EMPTY_C_STRING = "";
 // Helper to read text node value.
 // Returns 0 when cannot read the value.
 
-char const *readTextNode(xml_node<char> *rootNode, const char* name) {
+char const *readTextNode(xml_node<char> *rootNode, const char* name, std::vector<char*> &deallocate) {
 
     xml_node<char> *node = rootNode->first_node(name);
 
@@ -27,7 +28,61 @@ char const *readTextNode(xml_node<char> *rootNode, const char* name) {
 
         if (textNode) {
 
-            return textNode->value();
+            // Checks for case of multiple
+            // consecutive CDATA nodes.
+
+            if (textNode->next_sibling()) {
+
+                // First calculate required buffer size.
+
+                size_t neededSpace = 0;
+
+                xml_node<char> *sibling = textNode;
+
+                while (sibling) {
+
+                    neededSpace += strlen(sibling->value());
+
+                    sibling = sibling->next_sibling();
+                }
+
+                // Allocate the buffer + space for nul character.
+
+                char* buffer = (char *) malloc(neededSpace + 1);
+
+                // Set nul at end.
+
+                buffer[neededSpace] = '\0';
+
+                sibling = textNode;
+
+                // Offset into buffer.
+
+                size_t offset = 0;
+
+                // Copy to buffer.
+
+                while (sibling) {
+
+                    char *value = sibling->value();
+
+                    size_t length = strlen(value);
+
+                    memcpy(buffer + offset, value, length);
+
+                    offset += length;
+
+                    sibling = sibling->next_sibling();
+                }
+
+                deallocate.push_back(buffer);
+
+                return buffer;
+
+            } else {
+
+                return textNode->value();
+            }
 
         } else {
 
@@ -37,6 +92,16 @@ char const *readTextNode(xml_node<char> *rootNode, const char* name) {
     } else {
 
         return 0;
+    }
+}
+
+// Frees all manually allocated strings.
+
+void deallocateStrings(const std::vector<char*> &deallocate) {
+
+    for (std::vector<char*>::const_iterator it = deallocate.begin(); it != deallocate.end(); ++it) {
+
+        free(*it);
     }
 }
 
@@ -79,11 +144,16 @@ std::pair<int, int> findErrorLine(const char* xml, const char* where) {
 
 void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool extractContent) {
 
+    // Vector string pointers not
+    // deallocated by RapidXML.
+
+    std::vector<char*> deallocate;
+
     feed->Set(NanNew<String>("type"), NanNew<String>("atom"));
 
     // Extracts the title property.
 
-    char const *title = readTextNode(feedNode, "title");
+    char const *title = readTextNode(feedNode, "title", deallocate);
 
     if (title) {
 
@@ -92,7 +162,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
     // Extracts the id property.
 
-    char const *id = readTextNode(feedNode, "id");
+    char const *id = readTextNode(feedNode, "id", deallocate);
 
     if (id) {
 
@@ -115,7 +185,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
     // Extracts the author property.
 
-    char const *author = readTextNode(feedNode, "author");
+    char const *author = readTextNode(feedNode, "author", deallocate);
 
     if (author) {
 
@@ -136,7 +206,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
         // Extracts the id property.
 
-        char const *id = readTextNode(itemNode, "id");
+        char const *id = readTextNode(itemNode, "id", deallocate);
 
         if (id) {
 
@@ -220,7 +290,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
         // Extract the item title.
 
-        char const *title = readTextNode(itemNode, "title");
+        char const *title = readTextNode(itemNode, "title", deallocate);
 
         if (title) {
 
@@ -229,7 +299,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
         // Extract the published property.
 
-        char const *date = readTextNode(itemNode, "published");
+        char const *date = readTextNode(itemNode, "published", deallocate);
 
         if (date) {
 
@@ -239,7 +309,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
         // Extract the updated property.
         // Overwrites date set from published.
 
-        date = readTextNode(itemNode, "updated");
+        date = readTextNode(itemNode, "updated", deallocate);
 
         if (date) {
 
@@ -248,7 +318,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
         // Extract the item author.
 
-        char const *author = readTextNode(itemNode, "author");
+        char const *author = readTextNode(itemNode, "author", deallocate);
 
         if (author) {
 
@@ -259,7 +329,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
             // Extract the item summary.
 
-            char const *summary = readTextNode(itemNode, "summary");
+            char const *summary = readTextNode(itemNode, "summary", deallocate);
 
             if (summary) {
 
@@ -268,7 +338,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
             // Extract the item content.
 
-            char const *content = readTextNode(itemNode, "content");
+            char const *content = readTextNode(itemNode, "content", deallocate);
 
             if (content) {
 
@@ -284,11 +354,20 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
     }
 
     feed->Set(NanNew<String>("items"), items);
+
+    // Free created buffers.
+
+    deallocateStrings(deallocate);
 }
 
 // Parses the RSS feed.
 
 void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extractContent) {
+
+    // Vector string pointers not
+    // deallocated by RapidXML.
+
+    std::vector<char*> deallocate;
 
     feed->Set(NanNew<String>("type"), NanNew<String>("rss"));
 
@@ -303,7 +382,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
     // Extracts the title property.
 
-    char const *title = readTextNode(channelNode, "title");
+    char const *title = readTextNode(channelNode, "title", deallocate);
 
     if (title) {
 
@@ -312,7 +391,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
     // Extracts the description property.
 
-    char const *description = readTextNode(channelNode, "description");
+    char const *description = readTextNode(channelNode, "description", deallocate);
 
     if (description) {
 
@@ -321,7 +400,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
     // Extracts the link property.
 
-    char const *link = readTextNode(channelNode, "link");
+    char const *link = readTextNode(channelNode, "link", deallocate);
 
     if (link) {
 
@@ -330,7 +409,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
     // Extracts the author property.
 
-    char const *author = readTextNode(channelNode, "author");
+    char const *author = readTextNode(channelNode, "author", deallocate);
 
     if (author) {
 
@@ -350,7 +429,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Extracts the guid property.
 
-        char const *guid = readTextNode(itemNode, "guid");
+        char const *guid = readTextNode(itemNode, "guid", deallocate);
 
         if (guid) {
 
@@ -359,7 +438,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Extracts the link property.
 
-        char const *link = readTextNode(itemNode, "link");
+        char const *link = readTextNode(itemNode, "link", deallocate);
 
         if (link) {
 
@@ -368,7 +447,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Extracts the pubDate property.
 
-        char const *date = readTextNode(itemNode, "pubDate");
+        char const *date = readTextNode(itemNode, "pubDate", deallocate);
 
         if (date) {
 
@@ -377,7 +456,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Sometimes given in Dublin Core extension.
 
-        date = readTextNode(itemNode, "dc:date");
+        date = readTextNode(itemNode, "dc:date", deallocate);
 
         if (date) {
 
@@ -386,7 +465,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Extract the item title.
 
-        char const *title = readTextNode(itemNode, "title");
+        char const *title = readTextNode(itemNode, "title", deallocate);
 
         if (title) {
 
@@ -395,7 +474,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Extract the item author.
 
-        char const *author = readTextNode(itemNode, "author");
+        char const *author = readTextNode(itemNode, "author", deallocate);
 
         if (author) {
 
@@ -406,7 +485,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
             // Extract the item description.
 
-            char const *description = readTextNode(itemNode, "description");
+            char const *description = readTextNode(itemNode, "description", deallocate);
 
             if (description) {
 
@@ -422,6 +501,10 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
     }
 
     feed->Set(NanNew<String>("items"), items);
+
+    // Free created buffers.
+
+    deallocateStrings(deallocate);
 }
 
 NAN_METHOD(ParseFeed) {
