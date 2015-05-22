@@ -50,11 +50,15 @@ For Atom feeds:
     id: String,
     link: String,
     author: String,
+    author_uri: String,
+    author_email: String,
     items: [{
         id: String,
         title: String,
         date: Date,
         author: String,
+        author_uri: String,
+        author_email: String,
         summary: String,
         content: String,
         links: [{

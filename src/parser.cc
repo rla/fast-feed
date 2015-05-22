@@ -140,6 +140,56 @@ std::pair<int, int> findErrorLine(const char* xml, const char* where) {
     return std::pair<int, int>(ln, col);
 }
 
+// Parses the Atom feed/item author node.
+
+void parseAtomAuthor(xml_node<char> *feedNode, const Local<Object> &base, std::vector<char*> &deallocate) {
+
+    xml_node<char> *authorNode = feedNode->first_node("author");
+
+    if (!authorNode) {
+
+        // No author set.
+
+        return;
+    }
+
+    char const *name = readTextNode(authorNode, "name", deallocate);
+
+    if (name) {
+
+        // Name node is set.
+
+        base->Set(NanNew<String>("author"), NanNew<String>(name));
+
+        // Try to get uri and email nodes too.
+
+        char const *uri = readTextNode(authorNode, "uri", deallocate);
+
+        if (uri) {
+
+            base->Set(NanNew<String>("author_uri"), NanNew<String>(uri));
+        }
+
+        char const *email = readTextNode(authorNode, "email", deallocate);
+
+        if (email) {
+
+            base->Set(NanNew<String>("author_email"), NanNew<String>(email));
+        }
+
+    } else {
+
+        // Whole author node is probably a text node.
+
+        char const *author = readTextNode(feedNode, "author", deallocate);
+
+        if (author) {
+
+            base->Set(NanNew<String>("author"), NanNew<String>(author));
+        }
+    }
+}
+
 // Parses the Atom feed.
 
 void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool extractContent) {
@@ -185,12 +235,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
     // Extracts the author property.
 
-    char const *author = readTextNode(feedNode, "author", deallocate);
-
-    if (author) {
-
-        feed->Set(NanNew<String>("author"), NanNew<String>(author));
-    }
+    parseAtomAuthor(feedNode, feed, deallocate);
 
     // Extract all channel items.
 
@@ -318,12 +363,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
         // Extract the item author.
 
-        char const *author = readTextNode(itemNode, "author", deallocate);
-
-        if (author) {
-
-            item->Set(NanNew<String>("author"), NanNew<String>(author));
-        }
+        parseAtomAuthor(itemNode, item, deallocate);
 
         if (extractContent) {
 
