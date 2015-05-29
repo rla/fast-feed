@@ -531,6 +531,16 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
                 item->Set(NanNew<String>("description"), NanNew<String>(description));
             }
+
+            // <content:encoded> is a popular RSS extension.
+            // More info: https://developer.mozilla.org/en-US/docs/Web/RSS/Article/Why_RSS_Content_Module_is_Popular_-_Including_HTML_Contents
+
+            char const *content = readTextNode(itemNode, "content:encoded", deallocate);
+
+            if (content) {
+
+                item->Set(NanNew<String>("content"), NanNew<String>(content));
+            }
         }
 
         items->Set(NanNew<Number>(i), item);

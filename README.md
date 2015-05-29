@@ -93,13 +93,17 @@ For RSS 2 feeds:
         date: Date,
         title: String,
         author: String,
-        description: String
+        description: String,
+        content: String
     }]
 }
 ```
 
 Any attribute besides `type` might be missing. `description` is missing from items when
 the `content: false` option is used.
+
+The `content` property of an RSS 2 item is extracted when the item contains a `<content:encoded>` element.
+The information about the content module can be found on [MDN](https://developer.mozilla.org/en-US/docs/Web/RSS/Article/Why_RSS_Content_Module_is_Popular_-_Including_HTML_Contents).
 
 ## Supported Node/io.js versions
 
