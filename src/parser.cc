@@ -18,76 +18,84 @@ char const *EMPTY_C_STRING = "";
 // Helper to read text node value.
 // Returns 0 when cannot read the value.
 
+char const *readTextNode(xml_node<char> *node, std::vector<char*> &deallocate) {
+
+    xml_node<char> *textNode = node->first_node();
+
+    if (textNode) {
+
+        // Checks for case of multiple
+        // consecutive CDATA nodes.
+
+        if (textNode->next_sibling()) {
+
+            // First calculate required buffer size.
+
+            size_t neededSpace = 0;
+
+            xml_node<char> *sibling = textNode;
+
+            while (sibling) {
+
+                neededSpace += strlen(sibling->value());
+
+                sibling = sibling->next_sibling();
+            }
+
+            // Allocate the buffer + space for nul character.
+
+            char* buffer = (char *) malloc(neededSpace + 1);
+
+            // Set nul at end.
+
+            buffer[neededSpace] = '\0';
+
+            sibling = textNode;
+
+            // Offset into buffer.
+
+            size_t offset = 0;
+
+            // Copy to buffer.
+
+            while (sibling) {
+
+                char *value = sibling->value();
+
+                size_t length = strlen(value);
+
+                memcpy(buffer + offset, value, length);
+
+                offset += length;
+
+                sibling = sibling->next_sibling();
+            }
+
+            deallocate.push_back(buffer);
+
+            return buffer;
+
+        } else {
+
+            return textNode->value();
+        }
+
+    } else {
+
+        return EMPTY_C_STRING;
+    }
+}
+
+// Same as readTextNode(xml_node<char>, std::vector<char*>) but
+// takes an optional child node name.
+
 char const *readTextNode(xml_node<char> *rootNode, const char* name, std::vector<char*> &deallocate) {
 
     xml_node<char> *node = rootNode->first_node(name);
 
     if (node) {
 
-        xml_node<char> *textNode = node->first_node();
-
-        if (textNode) {
-
-            // Checks for case of multiple
-            // consecutive CDATA nodes.
-
-            if (textNode->next_sibling()) {
-
-                // First calculate required buffer size.
-
-                size_t neededSpace = 0;
-
-                xml_node<char> *sibling = textNode;
-
-                while (sibling) {
-
-                    neededSpace += strlen(sibling->value());
-
-                    sibling = sibling->next_sibling();
-                }
-
-                // Allocate the buffer + space for nul character.
-
-                char* buffer = (char *) malloc(neededSpace + 1);
-
-                // Set nul at end.
-
-                buffer[neededSpace] = '\0';
-
-                sibling = textNode;
-
-                // Offset into buffer.
-
-                size_t offset = 0;
-
-                // Copy to buffer.
-
-                while (sibling) {
-
-                    char *value = sibling->value();
-
-                    size_t length = strlen(value);
-
-                    memcpy(buffer + offset, value, length);
-
-                    offset += length;
-
-                    sibling = sibling->next_sibling();
-                }
-
-                deallocate.push_back(buffer);
-
-                return buffer;
-
-            } else {
-
-                return textNode->value();
-            }
-
-        } else {
-
-            return EMPTY_C_STRING;
-        }
+        return readTextNode(node, deallocate);
 
     } else {
 
@@ -102,6 +110,117 @@ void deallocateStrings(const std::vector<char*> &deallocate) {
     for (std::vector<char*>::const_iterator it = deallocate.begin(); it != deallocate.end(); ++it) {
 
         free(*it);
+    }
+}
+
+// Checks whether the node has only
+// text, CDATA or comment children.
+
+bool textOnly(xml_node<char> *node) {
+
+    xml_node<char> *child = node->first_node();
+
+    while (child) {
+
+        if (child->type() != node_data &&
+            child->type() != node_cdata &&
+            child->type() != node_comment) {
+
+            return false;
+        }
+
+        child = child->next_sibling();
+    }
+
+    return true;
+}
+
+// Checks whether the given node is an
+// extension node.
+
+bool isExtension(xml_node<char> *node) {
+
+    // Check that name contains
+    // the namespace separator.
+
+    return strchr(node->name(), ':') && textOnly(node);
+}
+
+// Checks whether the given XML node
+// has extensions.
+
+bool hasExtensions(xml_node<char> *node) {
+
+    xml_node<char> *extensionNode = node->first_node();
+
+    while (extensionNode) {
+
+        if (isExtension(extensionNode)) {
+
+            return true;
+        }
+
+        extensionNode = extensionNode->next_sibling();
+    }
+
+    return false;
+}
+
+// Extracts extensions from the given node.
+// Assumes that extensions use namespaces.
+
+void doExtractExtensions(xml_node<char> *node, const Local<Object> &base, std::vector<char*> &deallocate) {
+
+    if (hasExtensions(node)) {
+
+        // Only create data structures if there are
+        // any extensions.
+
+        Local<Array> extensions = NanNew<Array>();
+
+        int i = 0;
+
+        base->Set(NanNew<String>("extensions"), extensions);
+
+        xml_node<char> *extensionNode = node->first_node();
+
+        while (extensionNode) {
+
+            if (isExtension(extensionNode)) {
+
+                char const *name = extensionNode->name();
+
+                char const *extensionValue = readTextNode(extensionNode, deallocate);
+
+                Local<Object> extension = NanNew<Object>();
+
+                extension->Set(NanNew<String>("name"), NanNew<String>(name));
+
+                extension->Set(NanNew<String>("value"), NanNew<String>(extensionValue));
+
+                xml_attribute<char> *attributeNode = extensionNode->first_attribute();
+
+                if (attributeNode) {
+
+                    Local<Object> attributes = NanNew<Object>();
+
+                    while (attributeNode) {
+
+                        attributes->Set(NanNew<String>(attributeNode->name()), NanNew<String>(attributeNode->value()));
+
+                        attributeNode = attributeNode->next_attribute();
+                    }
+
+                    extension->Set(NanNew<String>("attributes"), attributes);
+                }
+
+                extensions->Set(NanNew<Number>(i), extension);
+
+                i++;
+            }
+
+            extensionNode = extensionNode->next_sibling();
+        }
     }
 }
 
@@ -192,7 +311,7 @@ void parseAtomAuthor(xml_node<char> *feedNode, const Local<Object> &base, std::v
 
 // Parses the Atom feed.
 
-void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool extractContent) {
+void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool extractContent, bool extractExtensions) {
 
     // Vector string pointers not
     // deallocated by RapidXML.
@@ -236,6 +355,13 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
     // Extracts the author property.
 
     parseAtomAuthor(feedNode, feed, deallocate);
+
+    // Extracts extensions when configured to.
+
+    if (extractExtensions) {
+
+        doExtractExtensions(feedNode, feed, deallocate);
+    }
 
     // Extract all channel items.
 
@@ -386,6 +512,13 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
             }
         }
 
+        // Extracts extensions when configured to.
+
+        if (extractExtensions) {
+
+            doExtractExtensions(itemNode, item, deallocate);
+        }
+
         items->Set(NanNew<Number>(i), item);
 
         itemNode = itemNode->next_sibling("entry");
@@ -402,7 +535,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
 
 // Parses the RSS feed.
 
-void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extractContent) {
+void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extractContent, bool extractExtensions) {
 
     // Vector string pointers not
     // deallocated by RapidXML.
@@ -456,6 +589,13 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
         feed->Set(NanNew<String>("author"), NanNew<String>(author));
     }
 
+    // Extracts extensions when configured to.
+
+    if (extractExtensions) {
+
+        doExtractExtensions(channelNode, feed, deallocate);
+    }
+
     // Extract all channel items.
 
     Local<Array> items = NanNew<Array>();
@@ -463,6 +603,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
     xml_node<char> *itemNode = channelNode->first_node("item");
 
     int i = 0;
+
     while (itemNode) {
 
         Local<Object> item = NanNew<Object>();
@@ -543,6 +684,13 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
             }
         }
 
+        // Extracts extensions when configured to.
+
+        if (extractExtensions) {
+
+            doExtractExtensions(itemNode, item, deallocate);
+        }
+
         items->Set(NanNew<Number>(i), item);
 
         itemNode = itemNode->next_sibling("item");
@@ -591,9 +739,16 @@ NAN_METHOD(ParseFeed) {
 
     bool extractContent = true;
 
-    if (args.Length() == 2) {
+    if (args.Length() >= 2) {
 
         extractContent = args[1]->BooleanValue();
+    }
+
+    bool extractExtensions = false;
+
+    if (args.Length() >= 3) {
+
+        extractExtensions = args[2]->BooleanValue();
     }
 
     // Creates new object to store the feed
@@ -607,7 +762,7 @@ NAN_METHOD(ParseFeed) {
 
     if (rssNode) {
 
-        parseRssFeed(rssNode, feed, extractContent);
+        parseRssFeed(rssNode, feed, extractContent, extractExtensions);
 
     } else {
 
@@ -615,7 +770,7 @@ NAN_METHOD(ParseFeed) {
 
         if (feedNode) {
 
-            parseAtomFeed(feedNode, feed, extractContent);
+            parseAtomFeed(feedNode, feed, extractContent, extractExtensions);
 
         } else {
 

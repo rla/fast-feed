@@ -61,7 +61,7 @@ function postProcRss2(feed) {
 }
 
 function parseAndPostProc(xml, options) {
-    var result = native.parse(xml, options.content);
+    var result = native.parse(xml, options.content, options.extensions);
     if (result.type === 'atom') {
         postProcAtom(result);
     } else {
@@ -86,6 +86,9 @@ exports.parse = function(xml, options, cb) {
     // non-specified options.
     if (typeof options.content === 'undefined') {
         options.content = true;
+    }
+    if (typeof options.extensions === 'undefined') {
+        options.extensions = false;
     }
     var result;
     if (typeof cb === 'function') {
