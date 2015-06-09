@@ -52,6 +52,7 @@ For Atom feeds:
     author: String,
     author_uri: String,
     author_email: String,
+    extensions: [Extension],
     items: [{
         id: String,
         title: String,
@@ -70,7 +71,8 @@ For Atom feeds:
             length: String,
             text: String
         }],
-        link: String
+        link: String,
+        extensions: [Extension]
     }]
 }
 ```
@@ -87,6 +89,7 @@ For RSS 2 feeds:
     description: String,
     link: String,
     author: String,
+    extensions: [Extension],
     items: [{
         id: String,
         link: String,
@@ -94,7 +97,8 @@ For RSS 2 feeds:
         title: String,
         author: String,
         description: String,
-        content: String
+        content: String,
+        extensions: [Extension]
     }]
 }
 ```
@@ -104,6 +108,26 @@ the `content: false` option is used.
 
 The `content` property of an RSS 2 item is extracted when the item contains a `<content:encoded>` element.
 The information about the content module can be found on [MDN](https://developer.mozilla.org/en-US/docs/Web/RSS/Article/Why_RSS_Content_Module_is_Popular_-_Including_HTML_Contents).
+
+### Feed extensions
+
+Feed extensions are supported on the syntax level. Particulary, any element on the feed/channel/item using a namespace
+and having no nested elements is considered an extension. Extensions contain the following data:
+
+```javascript
+{
+    name: String, // name of the element, such as dc:title
+    value: String, // string contents of the element
+    attributes: { String: String } // element attributes
+}
+```
+
+Parsing feed extensions is not enabled by default. Use the `extensions: true` option
+for the `parse` function to enable them. The `extensions`/`attributes` property will be missing instead
+of being empty when the feed/item has no extension. This has been done to reduce the gc stress.
+
+A single element can have multiple extensions with the same name. Extension names are
+not normalized into lowercase.
 
 ## Supported Node/io.js versions
 
