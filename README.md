@@ -99,7 +99,7 @@ For RSS 2 feeds:
         description: String,
         content: String,
         extensions: [Extension],
-        categories: [Object]
+        categories: [Category]
     }]
 }
 ```
@@ -109,6 +109,16 @@ the `content: false` option is used.
 
 The `content` property of an RSS 2 item is extracted when the item contains a `<content:encoded>` element.
 The information about the content module can be found on [MDN](https://developer.mozilla.org/en-US/docs/Web/RSS/Article/Why_RSS_Content_Module_is_Popular_-_Including_HTML_Contents).
+
+### Item categories
+
+The category object currently contains the following properties:
+
+```javascript
+{
+    name: String // RSS 2 category tag text contents
+}
+```
 
 ### Feed extensions
 
