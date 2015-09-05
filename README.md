@@ -144,13 +144,9 @@ Install dependencies:
 
     npm install
 
-Build the addon:
+Build native code and run tests (requires mocha globally installed):
 
-    node-gyp configure build
-
-Run tests (requires mocha globally installed):
-
-    make test
+    npm test
 
 ## Testing leaks
 
