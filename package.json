@@ -14,10 +14,11 @@
     "url": "https://github.com/rla/fast-feed.git"
   },
   "devDependencies": {
-    "mocha": "1.x"
+    "mocha": "1.x",
+    "node-gyp": "^2.0.2"
   },
   "scripts": {
-    "test": "mocha tests"
+    "test": "node-gyp configure build && mocha tests"
   },
   "files": [
     "src",
