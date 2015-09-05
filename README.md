@@ -99,7 +99,7 @@ For RSS 2 feeds:
         description: String,
         content: String,
         extensions: [Extension],
-        categories: [String]
+        categories: [Object]
     }]
 }
 ```
