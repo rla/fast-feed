@@ -533,6 +533,30 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
     deallocateStrings(deallocate);
 }
 
+// Creates an array of strings which represent the categories of an item node.
+
+Local<Array> readCategoriesFromItemNode(const xml_node<char> *itemNode, std::vector<char*> &deallocate) {
+
+    Local<Array> categories = NanNew<Array>();
+    xml_node<char> *categoryNode = itemNode->first_node("category");
+    int categoryIndex = 0;
+
+    while (categoryNode) {
+
+        char const *category = readTextNode(categoryNode, deallocate);
+
+        if (category) {
+
+            categories->Set(NanNew<Number>(categoryIndex), NanNew<String>(category));
+        }
+
+        categoryNode = categoryNode->next_sibling("category");
+        categoryIndex++;
+    }
+
+    return categories;
+}
+
 // Parses the RSS feed.
 
 void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extractContent, bool extractExtensions) {
@@ -607,6 +631,10 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
     while (itemNode) {
 
         Local<Object> item = NanNew<Object>();
+
+        // Extracts the categories.
+        Local<Array> categories = readCategoriesFromItemNode(itemNode, deallocate);
+        item->Set(NanNew<String>("categories"), categories);
 
         // Extracts the guid property.
 
