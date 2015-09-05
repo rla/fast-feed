@@ -2,7 +2,7 @@ var assert = require('assert');
 var parser = require('../');
 
 var rss = '<rss><channel><title>Test</title>' +
-    '<item><title>T1</title></item>ABC<item><title>T2</title></item></channel></rss>';
+    '<item><title>T1</title></item>ABC<item><title></title></item></channel></rss>';
 
 describe('Parser', function() {
 
