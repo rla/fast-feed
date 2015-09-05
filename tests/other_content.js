@@ -4,7 +4,7 @@ var parser = require('../');
 var rss = '<rss><channel><title>Test</title>' +
     '<item><title>T1</title></item>ABC<item><title></title></item></channel></rss>';
 
-var rssWithCategories = '<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">' +
+var rssWithCategories = '<rss version="2.0">' +
     '<channel><item><category>Motosport</category><category>Cars</category>'+
     '</item></channel></rss>';
 
