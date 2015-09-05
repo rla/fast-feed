@@ -3,6 +3,8 @@
 Node.JS module for parsing newsfeeds (RSS 2 and Atom). It should be one
 of the fastest feed parsers. Uses [RapidXML](http://rapidxml.sourceforge.net/).
 
+[![Build Status](https://travis-ci.org/rla/fast-feed.svg)](https://travis-ci.org/rla/fast-feed)
+
 ## Usage
 
 Without callback (throws exception):
