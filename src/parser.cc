@@ -547,7 +547,9 @@ Local<Array> readCategoriesFromItemNode(const xml_node<char> *itemNode, std::vec
 
         if (category) {
 
-            categories->Set(NanNew<Number>(categoryIndex), NanNew<String>(category));
+            Local<Object> categoryObject = NanNew<Object>();
+            categoryObject->Set(NanNew<String>("name"), NanNew<String>(category));
+            categories->Set(NanNew<Number>(categoryIndex), categoryObject);
         }
 
         categoryNode = categoryNode->next_sibling("category");
