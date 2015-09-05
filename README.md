@@ -98,7 +98,8 @@ For RSS 2 feeds:
         author: String,
         description: String,
         content: String,
-        extensions: [Extension]
+        extensions: [Extension],
+        categories: [String]
     }]
 }
 ```
