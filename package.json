@@ -33,5 +33,6 @@
   ],
   "dependencies": {
     "nan": "~1.9.0"
-  }
+  },
+  "license": "MIT"
 }
