@@ -122,6 +122,8 @@ The category object currently contains the following properties:
 }
 ```
 
+The `categories` property on the item is missing when it has no categories.
+
 ### Feed extensions
 
 Feed extensions are supported on the syntax level. Particulary, any element on the feed/channel/item using a namespace
