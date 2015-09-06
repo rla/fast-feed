@@ -636,7 +636,9 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
 
         // Extracts the categories.
         Local<Array> categories = readCategoriesFromItemNode(itemNode, deallocate);
-        item->Set(NanNew<String>("categories"), categories);
+        if (categories->Length() > 0) {
+          item->Set(NanNew<String>("categories"), categories);
+        }
 
         // Extracts the guid property.
 
