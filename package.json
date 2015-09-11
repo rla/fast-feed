@@ -32,7 +32,7 @@
     "README.md"
   ],
   "dependencies": {
-    "nan": "~1.9.0"
+    "nan": "~2.0.9"
   },
   "license": "MIT"
 }
