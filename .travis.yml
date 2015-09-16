@@ -1,6 +1,5 @@
 # this is a node project, but osx doesn't support node versions, so we use cpp as our language
-language: cpp
-compiler: gcc
+language: node_js
 sudo: false
 env:
   - export NODE_VERSION="0.10"
