@@ -1,4 +1,3 @@
-# this is a node project, but osx doesn't support node versions, so we use cpp as our language
 language: node_js
 sudo: false
 env:
