@@ -5,7 +5,7 @@
 #include <vector>
 #include <string.h>
 #include "rapidxml.hpp"
-#include "wincripple.hpp"
+#include "win_cripple.hpp"
 
 // Used example code from:
 // https://github.com/glynos/cpp-netlib/blob/master/contrib/http_examples/rss/rss.cpp
