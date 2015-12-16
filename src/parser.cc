@@ -801,12 +801,14 @@ NAN_METHOD(ParseFeed) {
     } catch(rapidxml::parse_error &e) {
 
         std::pair<int, int> loc = findErrorLine(*xml, e.where<char>());
+        
+        std::stringstream err;
+        err << "Error on line " << loc.first;
+        err << ", column " << loc.second;
+        err << ": " << e.what();
+        std::string strErr = err.str();
 
-        char buf[1024];
-
-        snprintf(buf, 1024, "Error on line %d column %d: %s", loc.first, loc.second, e.what());
-
-        Nan::ThrowTypeError(buf);
+        Nan::ThrowTypeError(strErr.c_str());
 
         return;
     }
