@@ -148,6 +148,8 @@ not normalized into lowercase.
 
 This package uses [Nan](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
 
+ * node 6.x
+ * node 5.x
  * node 4.0.0
  * node 0.10.24
  * node 0.12.0
@@ -170,12 +172,16 @@ Build native code and run tests (requires mocha globally installed):
 Leak testing uses assumption that RSS (not the feed but memory) set grows slowly. If it grows
 fast then the extension (or something else) leaks.
 
+Leak testing is started by running:
+
+    npm run test-leak
+
 ### Good
 
 RSS grows slowly:
 
 ```
-$ make test-leak
+$ npm run test-leak
 node --gc_global tests-leak/cdata.js
 { rss: 12419072, heapTotal: 6163968, heapUsed: 2259008 }
 { rss: 12955648, heapTotal: 6163968, heapUsed: 2392424 }
@@ -201,7 +207,7 @@ node --gc_global tests-leak/cdata.js
 RSS grows rapidly:
 
 ```
-$ make test-leak
+$ npm run test-leak
 node --gc_global tests-leak/cdata.js
 { rss: 79446016, heapTotal: 6163968, heapUsed: 2259008 }
 { rss: 146755584, heapTotal: 6163968, heapUsed: 2392424 }

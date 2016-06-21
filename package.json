@@ -1,6 +1,6 @@
 {
   "name": "fast-feed",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "keywords": [
     "rss",
     "atom",
@@ -14,11 +14,14 @@
     "url": "https://github.com/rla/fast-feed.git"
   },
   "devDependencies": {
-    "mocha": "1.x",
+    "eslint": "^2.13.1",
+    "mocha": "^2.5.3",
     "node-gyp": "^2.0.2"
   },
   "scripts": {
-    "test": "node-gyp configure build && mocha tests"
+    "test": "node-gyp configure build && mocha tests",
+    "test-leak": "node --gc_global tests-leak/cdata.js",
+    "lint": "eslint index.js tests"
   },
   "files": [
     "src",
@@ -27,12 +30,11 @@
     "index.js",
     "LICENSE",
     "LICENSE.rapidxml",
-    "Makefile",
     "package.json",
     "README.md"
   ],
   "dependencies": {
-    "nan": "~2.0.9"
+    "nan": "~2.3.5"
   },
   "license": "MIT"
 }
