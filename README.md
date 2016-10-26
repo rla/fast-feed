@@ -148,6 +148,7 @@ not normalized into lowercase.
 
 This package uses [NaN](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
 
+ * node 7.x
  * node 6.x
  * node 5.x
  * node 4.0.0
