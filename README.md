@@ -146,7 +146,7 @@ not normalized into lowercase.
 
 ## Supported Node/io.js versions
 
-This package uses [Nan](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
+This package uses [NaN](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
 
  * node 6.x
  * node 5.x
@@ -157,13 +157,19 @@ This package uses [Nan](https://github.com/rvagg/nan) and has been tested (insta
  * io.js 2.3.0
  * io.js 3.3.0
 
-## Running tests
+## Using on Windows
 
-Install dependencies:
+This package provides no prebuilt binaries. You need to install the
+required tools and rebuild it yourself. Use the instructions from
+https://github.com/nodejs/node-gyp
+
+## Developing
+
+Go to the project directory and install dependencies:
 
     npm install
 
-Build native code and run tests (requires mocha globally installed):
+Run tests (this also rebuilds the code):
 
     npm test
 
