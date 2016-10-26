@@ -146,7 +146,7 @@ not normalized into lowercase.
 
 ## Supported Node/io.js versions
 
-This package uses [NaN](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
+This package uses [NAN](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
 
  * node 7.x
  * node 6.x
