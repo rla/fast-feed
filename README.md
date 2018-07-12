@@ -148,15 +148,9 @@ not normalized into lowercase.
 
 This package uses [NAN](https://github.com/rvagg/nan) and has been tested (install+running tests) on:
 
- * node 7.x
- * node 6.x
- * node 5.x
- * node 4.0.0
- * node 0.10.24
- * node 0.12.0
- * io.js 1.5.1
- * io.js 2.3.0
- * io.js 3.3.0
+ * Node 10.x
+ * Node 8.x
+ * Node 6.x
 
 ## Using on Windows
 
