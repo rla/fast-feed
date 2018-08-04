@@ -153,6 +153,62 @@ void doExtractExtensions(xml_node<char> *node, const Local<Object> &base, std::v
     }
 }
 
+// Helper to populate object properties from XML
+// node attributes.
+
+void populateFromAttributes(xml_node<char> *node, const Local<Object> &target) {
+    xml_attribute<char> *attributeNode = node->first_attribute();
+    while (attributeNode) {
+        Nan::Set(target, Nan::New<String>(attributeNode->name()).ToLocalChecked(),
+            Nan::New<String>(attributeNode->value()).ToLocalChecked());
+        attributeNode = attributeNode->next_attribute();
+    }
+}
+
+// Helper to parse string into an integer.
+// From: https://stackoverflow.com/questions/14176123/correct-usage-of-strtol
+// Returns true when conversion was successful.
+
+bool parseLong(const char *str, long *val) {
+    char *temp;
+    bool rc = true;
+    errno = 0;
+    *val = strtol(str, &temp, 0);
+    if (temp == str || *temp != '\0' ||
+        ((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)) {
+            rc = false;
+        }
+    return rc;
+}
+
+// Extracts the enclosure element from the given node.
+
+void doExtractEnclosure(xml_node<char> *node, const Local<Object> &item) {
+    xml_node<char> *enclosureNode = node->first_node("enclosure");
+    if (!enclosureNode) {
+        return;
+    }
+    Local<Object> enclosure = Nan::New<Object>();
+    xml_attribute<char> *lengthAttr = enclosureNode->first_attribute("length");
+    if (lengthAttr) {
+        long length = 0;
+        if (parseLong(lengthAttr->value(), &length)) {
+            Nan::Set(enclosure, Nan::New<String>("length").ToLocalChecked(), Nan::New<Number>(length));
+        }
+    }
+    xml_attribute<char> *typeAttr = enclosureNode->first_attribute("type");
+    if (typeAttr) {
+        Nan::Set(enclosure, Nan::New<String>("type").ToLocalChecked(),
+            Nan::New<String>(typeAttr->value()).ToLocalChecked());
+    }
+    xml_attribute<char> *urlAttr = enclosureNode->first_attribute("url");
+    if (urlAttr) {
+        Nan::Set(enclosure, Nan::New<String>("url").ToLocalChecked(),
+            Nan::New<String>(urlAttr->value()).ToLocalChecked());
+    }
+    Nan::Set(item, Nan::New<String>("enclosure").ToLocalChecked(), enclosure);
+}
+
 // Helper to find the line number of error.
 
 std::pair<int, int> findErrorLine(const char* xml, const char* where) {
@@ -463,6 +519,8 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
             Nan::Set(item, Nan::New<String>("author").ToLocalChecked(),
                 Nan::New<String>(author).ToLocalChecked());
         }
+        // Extract the enclosure if it is set.
+        doExtractEnclosure(itemNode, item);
         if (extractContent) {
             // Extract the item description.
             char const *description = readTextNode(itemNode, "description", deallocate);

@@ -101,7 +101,8 @@ For RSS 2 feeds:
         description: String,
         content: String,
         extensions: [Extension],
-        categories: [Category]
+        categories: [Category],
+        enclosure: Enclosure
     }]
 }
 ```
@@ -123,6 +124,22 @@ The category object currently contains the following properties:
 ```
 
 The `categories` property on the item is missing when it has no categories.
+
+### Enclosure
+
+The RSS 2 enclosure object contains the following properties:
+
+```javascript
+{
+    length: Number,
+    type: String,
+    url: String
+}
+```
+
+The `enclosure` property on the item is missing when it has no enclosure.
+Properties of the `enclosure` might be missing. If the original length attribute
+cannot be parsed as a number, the corresponding property is missing.
 
 ### Feed extensions
 
