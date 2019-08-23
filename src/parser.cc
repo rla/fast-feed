@@ -327,27 +327,27 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
             xml_attribute<char> *titleAttr = linkNode->first_attribute("title");
             xml_attribute<char> *lengthAttr = linkNode->first_attribute("length");
             if (relAttr) {
-                link->Set(Nan::New<String>("rel").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("rel").ToLocalChecked(),
                     Nan::New<String>(relAttr->value()).ToLocalChecked());
             }
             if (hrefAttr) {
-                link->Set(Nan::New<String>("href").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("href").ToLocalChecked(),
                     Nan::New<String>(hrefAttr->value()).ToLocalChecked());
             }
             if (typeAttr) {
-                link->Set(Nan::New<String>("type").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("type").ToLocalChecked(),
                     Nan::New<String>(typeAttr->value()).ToLocalChecked());
             }
             if (hreflangAttr) {
-                link->Set(Nan::New<String>("hreflang").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("hreflang").ToLocalChecked(),
                     Nan::New<String>(hreflangAttr->value()).ToLocalChecked());
             }
             if (titleAttr) {
-                link->Set(Nan::New<String>("title").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("title").ToLocalChecked(),
                     Nan::New<String>(titleAttr->value()).ToLocalChecked());
             }
             if (lengthAttr) {
-                link->Set(Nan::New<String>("length").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("length").ToLocalChecked(),
                     Nan::New<String>(lengthAttr->value()).ToLocalChecked());
             }
             xml_node<char> *textNode = linkNode->first_node();
@@ -355,10 +355,10 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
             // put URL/IRI into link's text node like:
             // <link>http://example.com</link>
             if (textNode) {
-                link->Set(Nan::New<String>("text").ToLocalChecked(),
+                Nan::Set(link, Nan::New<String>("text").ToLocalChecked(),
                     Nan::New<String>(textNode->value()).ToLocalChecked());
             }
-            links->Set(Nan::New<Number>(linkIndex), link);
+            Nan::Set(links, linkIndex, link);
             linkIndex++;
             linkNode = linkNode->next_sibling("link");
         }
@@ -402,7 +402,7 @@ void parseAtomFeed(xml_node<char> *feedNode, const Local<Object> &feed, bool ext
         if (extractExtensions) {
             doExtractExtensions(itemNode, item, deallocate);
         }
-        items->Set(Nan::New<Number>(i), item);
+        Nan::Set(items, i, item);
         itemNode = itemNode->next_sibling("entry");
         i++;
     }
@@ -421,9 +421,9 @@ Local<Array> readCategoriesFromItemNode(const xml_node<char> *itemNode, std::vec
         char const *category = readTextNode(categoryNode, deallocate);
         if (category) {
             Local<Object> categoryObject = Nan::New<Object>();
-            categoryObject->Set(Nan::New<String>("name").ToLocalChecked(),
+            Nan::Set(categoryObject, Nan::New<String>("name").ToLocalChecked(),
                 Nan::New<String>(category).ToLocalChecked());
-            categories->Set(Nan::New<Number>(categoryIndex), categoryObject);
+            Nan::Set(categories, categoryIndex, categoryObject);
         }
         categoryNode = categoryNode->next_sibling("category");
         categoryIndex++;
@@ -540,7 +540,7 @@ void parseRssFeed(xml_node<char> *rssNode, const Local<Object> &feed, bool extra
         if (extractExtensions) {
             doExtractExtensions(itemNode, item, deallocate);
         }
-        items->Set(Nan::New<Number>(i), item);
+        Nan::Set(items, i, item);
         itemNode = itemNode->next_sibling("item");
         i++;
     }
@@ -570,11 +570,11 @@ NAN_METHOD(ParseFeed) {
     }
     bool extractContent = true;
     if (info.Length() >= 2) {
-        extractContent = info[1]->BooleanValue();
+        extractContent = Nan::To<bool>(info[1]).FromMaybe(true);
     }
     bool extractExtensions = false;
     if (info.Length() >= 3) {
-        extractExtensions = info[2]->BooleanValue();
+        extractExtensions = Nan::To<bool>(info[2]).FromMaybe(false);
     }
     // Creates new object to store the feed
     // contents.
@@ -595,9 +595,9 @@ NAN_METHOD(ParseFeed) {
     info.GetReturnValue().Set(feed);
 }
 
-void init(Handle<Object> exports) {
-  Nan::Set(exports, Nan::New<String>("parse").ToLocalChecked(),
-      Nan::New<FunctionTemplate>(ParseFeed)->GetFunction());
+NAN_MODULE_INIT(InitAll) {
+  Nan::Set(target, Nan::New<String>("parse").ToLocalChecked(),
+      Nan::GetFunction(Nan::New<FunctionTemplate>(ParseFeed)).ToLocalChecked());
 }
 
-NODE_MODULE(parser, init)
+NODE_MODULE(parser, InitAll)
